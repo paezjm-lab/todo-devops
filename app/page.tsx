@@ -2,17 +2,41 @@
 
 import { useState } from "react";
 
-export default function AddTask() {
-  const [task, setTask] = useState("");
+type Task = {
+  id: number;
+  text: string;
+  completed: boolean;
+};
+
+export default function Home() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [task, setTask] = useState<string>("");
 
   const addTask = () => {
-    if (task.trim() === "") {
-      alert("Please enter a task.");
-      return;
-    }
+    if (task.trim() === "") return;
 
-    alert("Task added: " + task);
+    const newTask: Task = {
+      id: Date.now(),
+      text: task,
+      completed: false,
+    };
+
+    setTasks([...tasks, newTask]);
     setTask("");
+  };
+
+  const completeTask = (id: number) => {
+    setTasks(
+      tasks.map((item) =>
+        item.id === id
+          ? { ...item, completed: !item.completed }
+          : item
+      )
+    );
+  };
+
+  const deleteTask = (id: number) => {
+    setTasks(tasks.filter((item) => item.id !== id));
   };
 
   return (
@@ -21,36 +45,73 @@ export default function AddTask() {
         maxWidth: "600px",
         margin: "50px auto",
         padding: "20px",
-        textAlign: "center",
       }}
     >
-      <h1>Add Task</h1>
+      <h1>My ToDo Application</h1>
 
-      <input
-        type="text"
-        placeholder="Enter a task..."
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
+      <div
         style={{
-          padding: "10px",
-          width: "300px",
+          display: "flex",
+          gap: "10px",
           marginTop: "20px",
         }}
-      />
+      >
+        <input
+          type="text"
+          placeholder="Enter a task..."
+          value={task}
+          onChange={(e) => setTask(e.target.value)}
+          style={{
+            flex: 1,
+            padding: "10px",
+          }}
+        />
 
-      <br />
+        <button onClick={addTask}>
+          Add Task
+        </button>
+      </div>
 
-      <button
-        type="button"
-        onClick={addTask}
+      <ul
         style={{
-          padding: "10px 20px",
-          marginTop: "15px",
-          cursor: "pointer",
+          marginTop: "30px",
+          padding: 0,
         }}
       >
-        Add Task
-      </button>
+        {tasks.map((item) => (
+          <li
+            key={item.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "15px",
+              listStyle: "none",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={item.completed}
+              onChange={() => completeTask(item.id)}
+            />
+
+            <span
+              style={{
+                flex: 1,
+                textDecoration: item.completed
+                  ? "line-through"
+                  : "none",
+              }}
+            >
+              {item.text}
+            </span>
+
+            <button onClick={() => deleteTask(item.id)}>
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }
